@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  uploadData,
-  list,
-  remove,
-  getUrl,
-  downloadData,
-} from 'aws-amplify/storage';
+import { uploadData, list, remove, downloadData } from 'aws-amplify/storage';
 import { Flex, Button, Text, Placeholder } from '@aws-amplify/ui-react';
 import { StorageManager } from '@aws-amplify/ui-react-storage';
 import '@aws-amplify/ui-react/styles.css';
@@ -27,9 +21,9 @@ export function UploadPage() {
       console.log(file);
 
       await uploadData({
-        path: `personal-files/${file.name}`,
-        file,
-      }).result;
+        path: `personal-files/${file?.name}`,
+        data: file,
+      });
       setIsLoading(false);
       listFiles();
     } catch (error) {
@@ -52,7 +46,7 @@ export function UploadPage() {
 
   async function handleDownload(path: string) {
     try {
-      const { body, etag } = await downloadData({
+      const { body, eTag } = await downloadData({
         path,
         options: {
           onProgress: (event) => {
@@ -68,7 +62,7 @@ export function UploadPage() {
       document.body.appendChild(link);
       link.click();
 
-      console.log('Downloaded file: ', body, etag);
+      console.log('Downloaded file: ', body, eTag);
     } catch (error) {
       console.log('Error downloading file: ', error);
     }
