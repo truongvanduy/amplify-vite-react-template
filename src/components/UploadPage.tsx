@@ -122,40 +122,42 @@ export function UploadPage() {
           isLoaded={!isLoading}
           size='large'></Placeholder>
       </Flex>
-      <ul>
-        {files.map((file: any) => (
-          <li key={file.eTag}>
-            <Flex
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'
-              gap='1rem'>
-              <Text>{file.path.split('/')[1]}</Text>
+      {!isLoading && (
+        <ul>
+          {files.map((file: any) => (
+            <li key={file.eTag}>
+              <Flex
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                gap='1rem'>
+                <Text>{file.path.split('/')[1]}</Text>
 
-              <Flex>
-                <Button
-                  variation='link'
-                  loadingText='Downloading...'
-                  isLoading={isDeleting && deleteId === file.eTag}
-                  onClick={() => handleDownload(file.path)}>
-                  Download
-                </Button>
-                <Button
-                  loadingText='Deleting...'
-                  isLoading={isDeleting && deleteId === file.eTag}
-                  onClick={() =>
-                    deleteData({
-                      path: file.path,
-                      id: file.eTag,
-                    })
-                  }>
-                  Delete
-                </Button>
+                <Flex>
+                  <Button
+                    variation='link'
+                    loadingText='Downloading...'
+                    isLoading={isDeleting && deleteId === file.eTag}
+                    onClick={() => handleDownload(file.path)}>
+                    Download
+                  </Button>
+                  <Button
+                    loadingText='Deleting...'
+                    isLoading={isDeleting && deleteId === file.eTag}
+                    onClick={() =>
+                      deleteData({
+                        path: file.path,
+                        id: file.eTag,
+                      })
+                    }>
+                    Delete
+                  </Button>
+                </Flex>
               </Flex>
-            </Flex>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
