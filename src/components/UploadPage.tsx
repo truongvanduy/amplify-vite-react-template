@@ -1,35 +1,41 @@
 import React from 'react';
-import { uploadData, list, remove, downloadData } from 'aws-amplify/storage';
+import {
+  //uploadData,
+  list,
+  getProperties,
+  remove,
+  downloadData,
+} from 'aws-amplify/storage';
 import { Flex, Button, Text, Placeholder } from '@aws-amplify/ui-react';
-import { StorageManager } from '@aws-amplify/ui-react-storage';
+import { StorageManager, StorageImage } from '@aws-amplify/ui-react-storage';
 import '@aws-amplify/ui-react/styles.css';
 
 export function UploadPage() {
-  const [file, setFile] = React.useState();
+  // const [file, setFile] = React.useState();
   const [files, setFiles] = React.useState([]);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [deleteId, setDeleteId] = React.useState('' as string);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleChange = (event: { target } | null) => {
-    setFile(event?.target?.files[0]);
-  };
+  // const handleChange = (event: { target } | null) => {
+  //   setFile(event?.target?.files[0]);
+  // };
 
-  async function handleUpload() {
-    try {
-      setIsLoading(true);
-      console.log(file);
+  // async function handleUpload() {
+  //   try {
+  //     setIsLoading(true);
+  //     console.log(file);
 
-      await uploadData({
-        path: `personal-files/${file?.name}`,
-        data: file,
-      });
-      setIsLoading(false);
-      listFiles();
-    } catch (error) {
-      console.log('Error uploading file: ', error);
-    }
-  }
+  //     await uploadData({
+  //       path: `personal-files/${file?.name}`,
+  //       data: file,
+  //     });
+  //     setIsLoading(false);
+  //     listFiles();
+  //   } catch (error) {
+  //     console.log('Error uploading file: ', error);
+  //   }
+  // }
 
   async function listFiles() {
     try {
@@ -37,7 +43,24 @@ export function UploadPage() {
       const results: { items: object[] } = await list({
         path: 'personal-files/',
       });
-      setFiles(results.items);
+      let { items } = results;
+
+      items = await Promise.all(
+        items.map(async (item: { path: string }) => {
+          const filePropeties = await getProperties({
+            path: item.path,
+          });
+
+          console.log('File properties: ', filePropeties);
+          return filePropeties;
+
+          // const blob = await filePropeties.blob();
+          // const url = URL.createObjectURL(blob);
+          // setBlobs((prev) => ({ ...prev, [eTag]: url }));
+        })
+      );
+
+      setFiles(items);
     } catch (error) {
       console.error('Error listing files ', error);
     }
@@ -111,6 +134,7 @@ export function UploadPage() {
 
       <hr />
 
+      {/* Placeholders */}
       <Flex direction='column'>
         <Placeholder
           isLoaded={!isLoading}
@@ -122,40 +146,57 @@ export function UploadPage() {
           isLoaded={!isLoading}
           size='large'></Placeholder>
       </Flex>
+
+      {/* File Lists */}
       {!isLoading && (
         <ul>
-          {files.map((file: any) => (
-            <li key={file.eTag}>
-              <Flex
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                gap='1rem'>
-                <Text>{file.path.split('/')[1]}</Text>
+          {files.map(
+            (file: { eTag: string; path: string; contentType: string }) => (
+              <li key={file.eTag}>
+                <Flex
+                  direction='row'
+                  justifyContent='space-between'
+                  alignItems='center'
+                  gap='1rem'>
+                  <Flex>
+                    <div className='preview'>
+                      <StorageImage
+                        path={
+                          file.contentType.startsWith('image')
+                            ? file.path
+                            : 'read-only/image-placeholder.png'
+                        }
+                        alt=''
+                        fallbackSrc='read-only/image-placeholder.png'
+                      />
+                    </div>
+                    <Text>{file.path.split('/')[1]}</Text>
+                  </Flex>
 
-                <Flex>
-                  <Button
-                    variation='link'
-                    loadingText='Downloading...'
-                    isLoading={isDeleting && deleteId === file.eTag}
-                    onClick={() => handleDownload(file.path)}>
-                    Download
-                  </Button>
-                  <Button
-                    loadingText='Deleting...'
-                    isLoading={isDeleting && deleteId === file.eTag}
-                    onClick={() =>
-                      deleteData({
-                        path: file.path,
-                        id: file.eTag,
-                      })
-                    }>
-                    Delete
-                  </Button>
+                  <Flex>
+                    <Button
+                      variation='link'
+                      loadingText='Downloading...'
+                      isLoading={isDeleting && deleteId === file.eTag}
+                      onClick={() => handleDownload(file.path)}>
+                      Download
+                    </Button>
+                    <Button
+                      loadingText='Deleting...'
+                      isLoading={isDeleting && deleteId === file.eTag}
+                      onClick={() =>
+                        deleteData({
+                          path: file.path,
+                          id: file.eTag,
+                        })
+                      }>
+                      Delete
+                    </Button>
+                  </Flex>
                 </Flex>
-              </Flex>
-            </li>
-          ))}
+              </li>
+            )
+          )}
         </ul>
       )}
     </div>
