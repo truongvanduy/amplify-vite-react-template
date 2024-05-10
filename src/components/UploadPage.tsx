@@ -6,11 +6,12 @@ import {
   remove,
   downloadData,
 } from 'aws-amplify/storage';
-import { Flex, Button, Text, Placeholder } from '@aws-amplify/ui-react';
+import { Flex, Button, Text } from '@aws-amplify/ui-react';
 import { StorageManager, StorageImage } from '@aws-amplify/ui-react-storage';
 import '@aws-amplify/ui-react/styles.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFile } from '@fortawesome/free-regular-svg-icons';
+import { ItemPlaceholder } from './ItemPlaceholder';
 
 export function UploadPage() {
   // const [file, setFile] = React.useState();
@@ -132,68 +133,68 @@ export function UploadPage() {
 
       <hr />
 
-      {/* Placeholders */}
-      <Flex direction='column'>
-        <Placeholder
-          isLoaded={!isLoading}
-          size='large'></Placeholder>
-        <Placeholder
-          isLoaded={!isLoading}
-          size='large'></Placeholder>
-        <Placeholder
-          isLoaded={!isLoading}
-          size='large'></Placeholder>
-      </Flex>
-
-      {/* File Lists */}
-      {!isLoading && (
+      {isLoading ? (
+        //  {/* Placeholders */}
+        <Flex
+          direction='column'
+          gap='8px'>
+          <ItemPlaceholder isLoaded={!isLoading}></ItemPlaceholder>
+          <ItemPlaceholder isLoaded={!isLoading}></ItemPlaceholder>
+          <ItemPlaceholder isLoaded={!isLoading}></ItemPlaceholder>
+          <div className='mb-8'></div>
+        </Flex>
+      ) : (
+        // {/* File Lists */}
         <ul>
           {files.map(
-            (file: { eTag: string; path: string; contentType: string }) => (
-              <li key={file.eTag}>
-                <Flex
-                  direction='row'
-                  justifyContent='space-between'
-                  alignItems='center'
-                  gap='1rem'>
-                  <Flex alignItems='center'>
-                    <div className='preview'>
-                      {file.contentType.startsWith('image/') ? (
-                        <StorageImage
-                          path={file.path}
-                          alt=''
-                          fallbackSrc='read-only/image-placeholder.png'
-                        />
-                      ) : (
-                        <FontAwesomeIcon icon={faFile} />
-                      )}
-                    </div>
-                    <Text>{file.path.split('/')[1]}</Text>
-                  </Flex>
+            (file: { eTag: string; path: string; contentType: string }) =>
+              isDeleting && deleteId === file.eTag ? (
+                <div className='mblock-8'>
+                  <ItemPlaceholder isLoaded={false}></ItemPlaceholder>
+                </div>
+              ) : (
+                <li key={file.eTag}>
+                  <Flex
+                    direction='row'
+                    justifyContent='space-between'
+                    alignItems='center'
+                    gap='1rem'>
+                    <Flex alignItems='center'>
+                      <div className='preview'>
+                        {file.contentType.startsWith('image/') ? (
+                          <StorageImage
+                            path={file.path}
+                            alt=''
+                            fallbackSrc='read-only/image-placeholder.png'
+                          />
+                        ) : (
+                          <FontAwesomeIcon icon={faFile} />
+                        )}
+                      </div>
+                      <Text>{file.path.split('/')[1]}</Text>
+                    </Flex>
 
-                  <Flex>
-                    <Button
-                      variation='link'
-                      loadingText='Downloading...'
-                      isLoading={isDeleting && deleteId === file.eTag}
-                      onClick={() => handleDownload(file.path)}>
-                      Download
-                    </Button>
-                    <Button
-                      loadingText='Deleting...'
-                      isLoading={isDeleting && deleteId === file.eTag}
-                      onClick={() =>
-                        deleteData({
-                          path: file.path,
-                          id: file.eTag,
-                        })
-                      }>
-                      Delete
-                    </Button>
+                    <Flex>
+                      <Button
+                        variation='link'
+                        onClick={() => handleDownload(file.path)}>
+                        Download
+                      </Button>
+                      <Button
+                        // loadingText='Deleting...'
+                        isLoading={isDeleting && deleteId === file.eTag}
+                        onClick={() =>
+                          deleteData({
+                            path: file.path,
+                            id: file.eTag,
+                          })
+                        }>
+                        Delete
+                      </Button>
+                    </Flex>
                   </Flex>
-                </Flex>
-              </li>
-            )
+                </li>
+              )
           )}
         </ul>
       )}

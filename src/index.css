@@ -45,9 +45,7 @@ ul {
   display: flex;
   flex-direction: column;
   margin: 8px 0;
-  border: 1px solid black;
   gap: 1px;
-  background-color: black;
   border-radius: 8px;
   overflow: auto;
 }
@@ -55,6 +53,11 @@ ul {
 li {
   background-color: white;
   padding: 8px;
+  border-radius: 0.5rem;
+}
+
+li + li {
+  margin-top: 0.5rem;
 }
 
 li:hover {
