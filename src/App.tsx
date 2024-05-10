@@ -7,7 +7,7 @@ function App() {
     <Authenticator>
       {({ signOut, user }) => (
         <main>
-          <h1>{user?.signInDetails?.loginId}'s todos</h1>
+          <h1>{user?.signInDetails?.loginId}</h1>
 
           <UploadPage />
 
