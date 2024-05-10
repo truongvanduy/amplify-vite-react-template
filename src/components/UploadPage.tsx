@@ -1,5 +1,11 @@
 import React from 'react';
-import { uploadData, list, remove } from 'aws-amplify/storage';
+import {
+  uploadData,
+  list,
+  remove,
+  getUrl,
+  downloadData,
+} from 'aws-amplify/storage';
 import { Flex, Button, Text, Placeholder } from '@aws-amplify/ui-react';
 import { StorageManager } from '@aws-amplify/ui-react-storage';
 import '@aws-amplify/ui-react/styles.css';
@@ -42,6 +48,30 @@ export function UploadPage() {
       console.error('Error listing files ', error);
     }
     setIsLoading(false);
+  }
+
+  async function handleDownload(path: string) {
+    try {
+      const { body, etag } = await downloadData({
+        path,
+        options: {
+          onProgress: (event) => {
+            console.log(event.transferredBytes);
+          },
+        },
+      }).result;
+      const blob = await body.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', path.split('/')[1]);
+      document.body.appendChild(link);
+      link.click();
+
+      console.log('Downloaded file: ', body, etag);
+    } catch (error) {
+      console.log('Error downloading file: ', error);
+    }
   }
 
   async function deleteData({ path, id }: { path: string; id: string }) {
@@ -107,17 +137,27 @@ export function UploadPage() {
               alignItems='center'
               gap='1rem'>
               <Text>{file.path.split('/')[1]}</Text>
-              <Button
-                loadingText='Deleting...'
-                isLoading={isDeleting && deleteId === file.eTag}
-                onClick={() =>
-                  deleteData({
-                    path: file.path,
-                    id: file.eTag,
-                  })
-                }>
-                Delete
-              </Button>
+
+              <Flex>
+                <Button
+                  variation='link'
+                  loadingText='Downloading...'
+                  isLoading={isDeleting && deleteId === file.eTag}
+                  onClick={() => handleDownload(file.path)}>
+                  Download
+                </Button>
+                <Button
+                  loadingText='Deleting...'
+                  isLoading={isDeleting && deleteId === file.eTag}
+                  onClick={() =>
+                    deleteData({
+                      path: file.path,
+                      id: file.eTag,
+                    })
+                  }>
+                  Delete
+                </Button>
+              </Flex>
             </Flex>
           </li>
         ))}
