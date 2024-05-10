@@ -9,6 +9,8 @@ import {
 import { Flex, Button, Text, Placeholder } from '@aws-amplify/ui-react';
 import { StorageManager, StorageImage } from '@aws-amplify/ui-react-storage';
 import '@aws-amplify/ui-react/styles.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFile } from '@fortawesome/free-regular-svg-icons';
 
 export function UploadPage() {
   // const [file, setFile] = React.useState();
@@ -53,10 +55,6 @@ export function UploadPage() {
 
           console.log('File properties: ', filePropeties);
           return filePropeties;
-
-          // const blob = await filePropeties.blob();
-          // const url = URL.createObjectURL(blob);
-          // setBlobs((prev) => ({ ...prev, [eTag]: url }));
         })
       );
 
@@ -160,15 +158,15 @@ export function UploadPage() {
                   gap='1rem'>
                   <Flex>
                     <div className='preview'>
-                      <StorageImage
-                        path={
-                          file.contentType.startsWith('image')
-                            ? file.path
-                            : 'read-only/image-placeholder.png'
-                        }
-                        alt=''
-                        fallbackSrc='read-only/image-placeholder.png'
-                      />
+                      {file.contentType.startsWith('image/') ? (
+                        <StorageImage
+                          path={file.path}
+                          alt=''
+                          fallbackSrc='read-only/image-placeholder.png'
+                        />
+                      ) : (
+                        <FontAwesomeIcon icon={faFile} />
+                      )}
                     </div>
                     <Text>{file.path.split('/')[1]}</Text>
                   </Flex>
