@@ -156,7 +156,7 @@ export function UploadPage() {
                   justifyContent='space-between'
                   alignItems='center'
                   gap='1rem'>
-                  <Flex>
+                  <Flex alignItems='center'>
                     <div className='preview'>
                       {file.contentType.startsWith('image/') ? (
                         <StorageImage
